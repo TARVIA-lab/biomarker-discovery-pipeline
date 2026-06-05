@@ -43,37 +43,46 @@ class DataIntegrator:
     def integrate_datasets(self, datasets_list):
         """
         Integrate multiple datasets with batch correction
-        
+
         Parameters:
         -----------
-        datasets_list : list of tuples
-            [(name, expression_df, metadata_df), ...]
-        
+        datasets_list : list of dicts
+            [{'name': str, 'expr': DataFrame, 'meta': DataFrame}, ...]
+
         Returns:
         --------
-        merged_expr : pd.DataFrame
-            Integrated expression matrix
-        merged_meta : pd.DataFrame
-            Merged metadata
+        dict with keys:
+            - 'expression': Integrated expression matrix (genes × samples)
+            - 'metadata': Merged metadata with batch column
         """
         normalized = []
         metadata = []
-        
-        for name, expr, meta in datasets_list:
+
+        for dataset in datasets_list:
+            name = dataset['name']
+            expr = dataset['expr']
+            meta = dataset['meta']
+
             # Normalize
             expr_norm = self.normalize_expression(expr)
-            expr_norm['dataset'] = name
-            
-            # Metadata
-            meta['dataset'] = name
-            
+
+            # Add batch info to metadata
+            meta = meta.copy()
+            meta['batch'] = name
+
             normalized.append(expr_norm)
             metadata.append(meta)
-        
-        # Merge
-        merged_expr = pd.concat(normalized, axis=0, join='inner')
+
+        # Merge expression (genes × samples)
+        # Use inner join on genes (rows)
+        merged_expr = pd.concat(normalized, axis=1, join='inner')
+
+        # Merge metadata (samples × columns)
         merged_meta = pd.concat(metadata, axis=0, ignore_index=True)
-        
-        return merged_expr, merged_meta
+
+        return {
+            'expression': merged_expr,
+            'metadata': merged_meta
+        }
 
 print("✓ DataIntegrator loaded")

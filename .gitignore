@@ -2,6 +2,7 @@
 data/raw/*
 data/processed/*
 !data/.gitkeep
+!data/golden_genes.csv
 *.csv
 *.xlsx
 *.h5
