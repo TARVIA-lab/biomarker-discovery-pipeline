@@ -52,5 +52,6 @@ env/
 *.ipynb_checkpoints
 
 # Results & outputs
-figures/
 results/
+!figures/
+figures/*.gitkeep
