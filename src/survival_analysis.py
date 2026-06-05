@@ -96,13 +96,28 @@ class SurvivalAnalyzer:
 
     def kaplan_meier(self, expression_series, time_col, event_col, metadata_df, cutoff=None):
         """
-        Generate Kaplan-Meier curves for high vs low expression
-        """
-        if cutoff is None:
-            cutoff = expression_series.median()
+        Generate Kaplan-Meier curves for high vs low expression.
 
-        data = metadata_df.copy()
-        data['expression'] = expression_series
+        Parameters:
+        -----------
+        expression_series : array-like or pd.Series
+        time_col, event_col : str
+        metadata_df : pd.DataFrame
+        cutoff : float, optional (default: median)
+
+        Returns:
+        --------
+        data : pd.DataFrame with 'group' column (1=high, 0=low)
+        cutoff : float
+        """
+        expr_values = np.array(expression_series).flatten()
+        valid = ~np.isnan(expr_values)
+
+        if cutoff is None:
+            cutoff = float(np.nanmedian(expr_values))
+
+        data = metadata_df.reset_index(drop=True).copy()
+        data['expression'] = expr_values
         data['group'] = (data['expression'] > cutoff).astype(int)
 
         return data, cutoff

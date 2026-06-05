@@ -16,7 +16,9 @@ class DataIntegrator:
     def load_golden_genes(self, filepath):
         """Load 352 golden RelB-dependent genes"""
         genes_df = pd.read_csv(filepath)
-        return genes_df['gene_name'].tolist()
+        # Support both 'gene_symbol' (our format) and 'gene_name' (legacy)
+        col = 'gene_symbol' if 'gene_symbol' in genes_df.columns else 'gene_name'
+        return genes_df[col].tolist()
     
     def normalize_expression(self, expression_matrix):
         """
